@@ -34,6 +34,7 @@ def main():
 
     # instantiate Player object at the given coordinates
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, PLAYER_RADIUS)
+    player.timer = 0
     asteroid_field = AsteroidField()
 
     while 1:
@@ -42,21 +43,28 @@ def main():
                 return
             
             # add a shot to the screen every time space bar is pressed
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and player.timer <= 0:
                 new_shot = player.shoot()
                 shots.add(new_shot)
                 updatable.add(new_shot)
+                player.timer = PLAYER_SHOOT_COOLDOWN
         screen.fill("black")
 
         for entity in drawable:
             entity.draw(screen)
         for sprite in updatable:
             sprite.update(dt)
+            player.timer -= dt
         for asteroid in asteroids:
-            is_colliding = asteroid.collision_check(player)
-            if is_colliding == True:
+            is_colliding_player = asteroid.collision_check(player)
+            if is_colliding_player == True:
                 print("Game over!")
                 return
+            for shot in shots:
+                is_colliding_shot = asteroid.collision_check(shot)
+                if is_colliding_shot == True:
+                    asteroid.split()
+                    new_shot.kill()
         pygame.display.flip()
 
         dt = clock.tick(60) / 1000
