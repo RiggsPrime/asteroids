@@ -49,3 +49,6 @@ class Player(CircleShape):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         new_shot.velocity = forward * PLAYER_SHOOT_SPEED
         return new_shot
+
+    def show_iframes(self, screen):
+        pygame.draw.polygon(screen, "red", self.triangle(), 2)

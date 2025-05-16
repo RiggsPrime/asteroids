@@ -16,6 +16,9 @@ def main():
     print("Starting Asteroids!")
     print(f"Screen width: {SCREEN_WIDTH}")
     print(f"Screen height: {SCREEN_HEIGHT}")
+    score = 0
+    lives = 2
+
 
     # variables used to redraw the game window
     clock = pygame.time.Clock()
@@ -35,6 +38,7 @@ def main():
     # instantiate Player object at the given coordinates
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, PLAYER_RADIUS)
     player.timer = 0
+    player.iframes = PLAYER_IFRAMES
     asteroid_field = AsteroidField()
 
     while 1:
@@ -52,17 +56,27 @@ def main():
 
         for entity in drawable:
             entity.draw(screen)
+            if player.iframes > 0:
+                player.show_iframes(screen)
         for sprite in updatable:
             sprite.update(dt)
             player.timer -= dt
+            player.iframes -= dt
         for asteroid in asteroids:
             is_colliding_player = asteroid.collision_check(player)
-            if is_colliding_player == True:
-                print("Game over!")
-                return
+            if is_colliding_player == True and player.iframes <= 0:
+                if lives == 0:
+                    print("Game over!")
+                    return
+                player.position = SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2
+                lives -= 1
+                player.iframes = PLAYER_IFRAMES * 2
+                print(f"Lives left: {lives}")
             for shot in shots:
                 is_colliding_shot = asteroid.collision_check(shot)
                 if is_colliding_shot == True:
+                    score += 1
+                    print(f"Score: {score}")
                     asteroid.split()
                     new_shot.kill()
         pygame.display.flip()
